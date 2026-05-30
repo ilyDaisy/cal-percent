@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคิดเลขเปอร์เซ็นต์ แยกช่อง Real-time</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
+        <h2 class="text-xl font-bold text-center text-white mb-6">คำนวณเปอร์เซ็นต์ Real-time</h2>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-300 mb-1">จำนวนเงินตั้งต้น (บาท)</label>
+            <input type="number" id="amount-input" value="1000" class="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xl font-mono text-white" placeholder="กรอกจำนวนเงิน">
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-300 mb-1">เปอร์เซ็นต์ที่ต้องการ (เช่น -10% หรือ +7%)</label>
+            <input type="text" id="percent-input" value="-10%" class="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xl font-mono text-amber-400 font-bold" placeholder="ตัวอย่าง -10% หรือ +7%">
+        </div>
+
+        <hr class="border-slate-700 mb-6">
+
+        <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 text-center">
+            <div class="text-sm font-medium text-slate-400 mb-1">ผลลัพธ์สุทธิ</div>
+            <div id="result-display" class="text-4xl font-black font-mono">0.00</div>
+        </div>
+    </div>
+
+    <script>
+        const amountInput = document.getElementById('amount-input');
+        const percentInput = document.getElementById('percent-input');
+        const resultDisplay = document.getElementById('result-display');
+
+        function calculate() {
+            const baseAmount = parseFloat(amountInput.value) || 0;
+            // ดึงค่าจากช่องเปอร์เซ็นต์ ลบช่องว่างออก
+            let percentStr = percentInput.value.replace(/\s+/g, '');
+
+            // ใช้ Regex ตรวจจับเครื่องหมาย + หรือ - และตัวเลขเปอร์เซ็นต์ (เปอร์เซ็นต์จะมี % หรือไม่มีก็ได้)
+            const regex = /^([+\-])?(\d+\.?\d*)%?$/;
+            const match = percentStr.match(regex);
+
+            if (match) {
+                // ถ้าไม่พิมพ์เครื่องหมาย ให้คะเนว่าเป็น ลบ (-) ไว้ก่อนตามพฤติกรรมคนส่วนใหญ่ หรือเปลี่ยนเป็น '+' ตามชอบได้ครับ
+                const operator = match[1] || '-'; 
+                const percent = parseFloat(match[2]) || 0;
+
+                // คำนวณมูลค่าเปอร์เซ็นต์
+                const percentValue = (baseAmount * percent) / 100;
+                let finalResult = baseAmount;
+
+                if (operator === '+') {
+                    finalResult = baseAmount + percentValue;
+                    resultDisplay.className = "text-4xl font-black text-emerald-400 font-mono"; // สีเขียวเมื่อบวกเพิ่ม
+                } else if (operator === '-') {
+                    finalResult = baseAmount - percentValue;
+                    resultDisplay.className = "text-4xl font-black text-rose-400 font-mono"; // สีแดงเมื่อหักออก
+                }
+
+                // แสดงผลลัพธ์แบบใส่คอมม่าและทศนิยม 2 ตำแหน่ง
+                resultDisplay.innerText = finalResult.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else {
+                // ถ้าพิมพ์รูปแบบไม่ถูกต้อง
+                resultDisplay.innerText = "รอรูปแบบ...";
+                resultDisplay.className = "text-2xl font-bold text-slate-500 font-mono";
+            }
+        }
+
+        // สั่งให้ทำงานแบบ Real-time ทั้งสองช่อง
+        amountInput.addEventListener('input', calculate);
+        percentInput.addEventListener('input', calculate);
+
+        // รันครั้งแรกตอนโหลดหน้าเว็บ
+        calculate();
+    </script>
+
+</body>
+</html>
